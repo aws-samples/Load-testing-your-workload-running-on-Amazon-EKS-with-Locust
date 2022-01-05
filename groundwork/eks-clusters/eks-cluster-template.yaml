@@ -1,0 +1,45 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: "${TARGET_CLUSTER_NAME}"
+  version: "${TARGET_EKS_VERSION}"
+  region: "${TARGET_REGION}"
+
+managedNodeGroups:
+  - name: mng-addon
+    labels:
+      position: addon
+    instanceType: m5.large
+    minSize: 1
+    maxSize: 30
+    desiredCapacity: 1
+    volumeSize: 20
+    privateNetworking: true
+    tags:
+      nodegroup-role: addon
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        externalDNS: true
+        certManager: true
+        albIngress: true
+        cloudWatch: true
+
+  - name: "mng-${TARGET_GROUP_NAME}"
+    labels:
+      position: "${TARGET_GROUP_NAME}"
+    instanceType: m5.xlarge
+    minSize: 3
+    maxSize: 450
+    desiredCapacity: 3
+    volumeSize: 20
+    privateNetworking: true
+    tags:
+      nodegroup-role: "${TARGET_GROUP_NAME}"
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+        externalDNS: true
+        certManager: true
+        albIngress: true
+        cloudWatch: true
