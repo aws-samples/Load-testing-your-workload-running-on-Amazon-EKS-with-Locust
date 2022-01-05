@@ -1,0 +1,66 @@
+# Values for workload-chart.
+replicaCount: 3
+
+image:
+  repository: ${ECR_URL}/${ECR_REPO_NAME}
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: "sa-no-use"
+
+service:
+  type: NodePort
+  port: 8080
+
+ingress:
+  enabled: true
+  annotations:
+    # https://kubernetes-sigs.github.io/aws-load-balancer-controller/guide/ingress/annotations/
+    # Ingress Core Settings
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    # Ingress Target - Instance in Node Group :: https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html
+    alb.ingress.kubernetes.io/target-type: instance
+    # Health Check Settings
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP 
+    alb.ingress.kubernetes.io/healthcheck-port: traffic-port
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/success-codes: '200'
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '10'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '2'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '3'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+  hosts:
+    - paths:
+        - path: /*
+          pathType: ImplementationSpecific
+          svcPort: 8080
+
+resources:
+  limits:
+    memory: 1Gi
+    cpu: 1000m
+  requests:
+    memory: 512Mi
+    cpu: 600m
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 200
+  targetCPUUtilizationPercentage: 10
+  # targetMemoryUtilizationPercentage: 80
+
+podAnnotations: {
+  load-type: on-cpu
+}
+
+nodeSelector: {
+  position: workload
+}
