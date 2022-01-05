@@ -1,20 +1,28 @@
 # Prepare EKS Clusters
 
 - [Prerequisite](#prerequisite)
-- [Create Locust Cluster](#create-locust-cluster)
-- [Create Workload Cluster](#create-workload-cluster) (option)
-- [Result](#result)
+- Provisioning EKS Clusters
+  - [Create Locust Cluster](#create-locust-cluster)
+  - [Create Workload Cluster](#create-workload-cluster) (option)
+  - [Result](#result)
 
 ## Prerequisite
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl) (check [version release](https://kubernetes.io/releases/))
 - [eksctl](https://eksctl.io/introduction/#installation) (check [version release](https://github.com/weaveworks/eksctl/releases))
 - [jq](https://stedolan.github.io/jq/download/)
+- [awscli v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html)
 - [Setting AWS Profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) (with [minimum IAM policies](https://eksctl.io/usage/minimum-iam-policies/))
 
   ```bash
   # Check your profile
   aws sts get-caller-identity
+  ```
+
+- Pull this repository
+
+  ```bash
+  git clone https://github.com/aws-samples/load-testing-eks-cluster-with-locust
   ```
 
 ## Create Locust Cluster

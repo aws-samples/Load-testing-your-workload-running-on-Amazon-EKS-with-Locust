@@ -3,6 +3,19 @@
 As the last ground work, we need to deploy app chart for workload for target of load-testing.
 (If you already have workload to follow our journey, you can use yours.)
 
+- [Prepare](#prepare)
+  - [Prerequisites](#prerequisites)
+  - [Set environment](#set-environment)
+  - [Create an ECR repository](#create-an-ecr-repository)
+  - [Pull a public container image](#pull-a-public-container-image)
+  - [Tag this image](#tag-this-image)
+  - [Push the image tag]
+- [Install Workload Application (Helm Chart)](#install-workload-application-helm-chart)
+  - [Set context of kubectl](#set-context-of-kubectl)
+  - [Prepare `values.yaml` file](#prepare-values.yaml-file)
+  - [Install Chart](#install-chart)
+- [Tip. Clean up the workloads](#tip-clean-up-the-workloads)
+
 ## Prepare
 
 ### Prerequisites
@@ -181,7 +194,7 @@ You can check response message in your browser like below.
 
 Nice! It's done :)
 
-### Tip. Clean up the workloads
+## Tip. Clean up the workloads
 
 ```bash
 # Uninstall this chart existed in default namespace
