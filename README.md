@@ -46,18 +46,10 @@ Install CLI tools and settings.
 - [helm](https://helm.sh/docs/intro/install/) ([check version release](https://github.com/helm/helm/releases))
 - [jq](https://stedolan.github.io/jq/download/)
 - [awscli v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html)
-- [Setting AWS Profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) ([with minimum IAM policies](https://eksctl.io/usage/minimum-iam-policies/))
-
-  ```bash
-  # Check your profile
-  aws sts get-caller-identity
-  ```
-
-- Pull this repository
-
-  ```bash
-  git clone https://github.com/aws-samples/load-testing-eks-cluster-with-locust
-  ```
+- [Setting AWS Profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) ([with minimum IAM policies](https://eksctl.io/usage/minimum-iam-policies/)):
+  `aws sts get-caller-identity`
+- Pull this repository:
+  `git clone https://github.com/aws-samples/load-testing-eks-cluster-with-locust`
 
 ### Provisioning EKS Clusters
 
@@ -82,11 +74,11 @@ Then you can check the results in AWS Consoles.
 
 For load-tesing on eks, we basically need to install these kubernetes addons charts. These charts are commonly used in eks clusters, thus we need to do the below installation jobs in both of clusters: `awsblog-loadtest-locust` and `awsblog-loadtest-workload` (or your other target cluster).
 
-- [Deploy Metrics server (YAML)](./groundwork/eks-clusters#deploy-metrics-server-yaml)
-- [Skip installation step for HPA(Horizontal Pod Autoscaler)](./groundwork/eks-clusters#skip-installation-step-for-hpa)
-- [Install Cluster Autoscaler (Chart)](./groundwork/eks-clusters#install-ca-helm-chart)
-- [Install AWS Load Balancer Controller (Chart)](./groundwork/eks-clusters#install-aws-load-balancer-controller-helm-chart)
-- [Install Container Insights (YAML)](./groundwork/eks-clusters#install-container-insights)
+- [Deploy Metrics server (YAML)](./groundwork/install-addon-chart#deploy-metrics-server-yaml)
+- [Skip installation step for HPA(Horizontal Pod Autoscaler)](./groundwork/install-addon-chart#skip-installation-step-for-hpa)
+- [Install Cluster Autoscaler (Chart)](./groundwork/install-addon-chart#install-ca-helm-chart)
+- [Install AWS Load Balancer Controller (Chart)](./groundwork/install-addon-chart#install-aws-load-balancer-controller-helm-chart)
+- [Install Container Insights (YAML)](./groundwork/install-addon-chart#install-container-insights)
 
 ### Installing a Sample Application Helm Chart
 
