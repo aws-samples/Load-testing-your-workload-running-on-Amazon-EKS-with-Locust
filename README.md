@@ -112,6 +112,23 @@ You now have the Kubernetes side ready, but there are still a few things left to
 
 ### STEP 1. Install Locust
 
+📌 **Switch kubernetes context to run commands on the locust cluster:**
+
+In the above section, we installed a sample application on the workload cluster(`awsblog-loadtest-workload`), in order to test the application, we need to switch kubernetes context from the workload cluster to the locust cluster(`awsblog-loadtest-locust`).
+
+```bash
+# Unset context - Optional
+kubectl config unset current-context
+
+# Set context of locust cluster
+export LOCUST_CLUSTER_NAME="awsblog-loadtest-locust"
+export LOCUST_CONTEXT=$(kubectl config get-contexts | sed -e 's/\*/ /' | grep "@${LOCUST_CLUSTER_NAME}." | awk -F" " '{print $1}')
+kubectl config use-context ${LOCUST_CONTEXT}
+
+# Check
+kubectl config current-context
+```
+
 #### Switch kubernetes context to run commands on the locust cluster
 
 TODO

@@ -31,9 +31,9 @@ As the last ground work, we need to deploy app chart for workload for target of 
 # Set optional environment variables
 export AWS_PROFILE="YOUR_PROFILE" # If not, use 'default' profile
 export AWS_REGION="YOUR_REGION"   # ex. ap-northeast-2
+export ACCOUNT_ID=$(aws sts get-caller-identity --output json | jq ".Account" | tr -d '"')
 
 # Set specific environment variables
-export ACCOUNT_ID=$(aws sts get-caller-identity --output json | jq ".Account" | tr -d '"')
 export ECR_URL="${ACCOUNT_ID}.dkr.ecr.${TARGET_REGION}.amazonaws.com"
 export ECR_REPO_NAME="sample-application"
 
@@ -42,8 +42,8 @@ cat <<EOF
 _______________________________________________
 * AWS_PROFILE   : ${AWS_PROFILE:-(default)}
 * AWS_REGION    : ${AWS_REGION:-(invalid!)}
-_______________________________________________
 * ACCOUNT_ID    : ${ACCOUNT_ID:-(invalid!)}
+_______________________________________________
 * ECR_URL       : ${ECR_URL}
 * ECR_REPO_NAME : ${ECR_REPO_NAME}
 EOF
@@ -127,13 +127,16 @@ aws ecr list-images --repository-name ${ECR_REPO_NAME} --output json | jq -c '.i
 # Unset context
 kubectl config unset current-context
 
-# Set context of workload cluster
+# Set Workload Cluster Context
 export WORKLOAD_CLUSTER_NAME="awsblog-loadtest-workload"
-export WORKLOAD_CONTEXT=$(kubectl config get-contexts | grep "${WORKLOAD_CLUSTER_NAME}" | awk -F" " '{print $1}')
+export WORKLOAD_CONTEXT=$(kubectl config get-contexts | sed 's/\*/ /g' | grep "@${WORKLOAD_CLUSTER_NAME}." | awk -F" " '{print $1}')
 kubectl config use-context ${WORKLOAD_CONTEXT}
 
 # Check
 kubectl config current-context
+
+# Like this..
+# <IAM_ROLE>@awsblog-loadtest-workload.<TARGET_REGION>.eksctl.io
 ```
 
 ### Prepare `values.yaml` file
@@ -174,7 +177,7 @@ kubectl get service ${CHART_NAME}
 kubectl get ingress ${CHART_NAME}
 
 # Copy the Ingress Address to your clipboard
-kubectl get ingress ${CHART_NAME} | grep -v NAME | awk -F" " '{print $4}' | pbcopy
+kubectl get ingress ${CHART_NAME} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' | pbcopy
 ```
 
 You can check response message in your browser like below.
