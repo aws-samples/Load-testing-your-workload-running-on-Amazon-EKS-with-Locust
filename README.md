@@ -19,6 +19,7 @@ TODO: single line message to introduce this contents
   - [STEP 2. Expose Locust via ALB](#step-2-expose-locust-via-alb)
   - [STEP 3. Checkout Locust Dashboard](#step-3-checkout-locust-dashboard)
   - [STEP 4. Run Test](#step-4-run-test)
+  - [STEP 5. Run Test (2nd)](#step-5-run-test-2nd)
 - [Clean up](#clean-up)
 - [Summary](#summary)
 - [Security](#security)
@@ -112,7 +113,7 @@ You now have the Kubernetes side ready, but there are still a few things left to
 
 ### STEP 1. Install Locust
 
-📌 **Switch kubernetes context to run commands on the locust cluster:**
+#### _Switch kubernetes context to run commands on the locust cluster:_
 
 In the above section, we installed a sample application on the workload cluster(`awsblog-loadtest-workload`), in order to test the application, we need to switch kubernetes context from the workload cluster to the locust cluster(`awsblog-loadtest-locust`).
 
@@ -127,35 +128,156 @@ kubectl config use-context ${LOCUST_CONTEXT}
 
 # Check
 kubectl config current-context
+
+# Like this..
+# <IAM_ROLE>@awsblog-loadtest-locust.<TARGET_REGION>.eksctl.io
 ```
 
-#### Switch kubernetes context to run commands on the locust cluster
+#### _Add Delivery Hero public chart repo:_
 
-TODO
+```bash
+# Helm chart repo setting
+helm repo add deliveryhero "https://charts.deliveryhero.io/"
+helm repo update deliveryhero
 
-#### Add Delivery Hero public chart repo
+# Check
+helm repo list | egrep "NAME|deliveryhero"
+```
 
-TODO
+#### _Write a `locustfile.py` file:_
 
-#### Write a locustfile.py
+Create a file with the code below and save it as `locustfile.py`. If you want to test another endpoint, [edit this line](./walkthrough/locustfile.py#L10) from `/` to another one (like [`/load-gen/loop?count=50&range=1000` what we deployed in groundwork](https://github.com/SPONGE-JL/load-testing-spring-worker#api-list)). For more in depth explanation how to write the `locustfile.py`, you can refer to [the official locust documentation](http://docs.locust.io/en/stable/index.html).
 
-TODO
+```bash
+# Execute in root of repository, and maybe this file has existed.
+cat <<EOF > ./walkthrough/locustfile.py
+from locust import HttpUser, task, between
+
+default_headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.100 Safari/537.36'}
+
+class WebsiteUser(HttpUser):
+    wait_time = between(1, 5)
+
+    @task(1)
+    def get_index(self):
+        self.client.get("/", headers=default_headers)
+EOF
+
+# Check
+cat ./walkthrough/locustfile.py
+```
 
 #### Install and Configure Locust with locustfile.py
 
-TODO
+Executing the following command will install locust using the `locustfile.py` created above. It will also start locust with 5 worker pods with HPA (Horizontal Pod Autoscaler) enabled. This will provide us a good starting point for the load test that automatically scales as the size of the load increases.
+
+```bash
+# Create ConfigMap 'eks-loadtest-locustfile' from the locustfile.py created above
+kubectl create configmap eks-loadtest-locustfile --from-file ./walkthrough/locustfile.py
+kubectl describe configmap eks-loadtest-locustfile
+
+# Install Locust Helm Chart
+helm upgrade --install eks-loadtest-locust deliveryhero/locust \
+    --set loadtest.name=eks-loadtest \
+    --set loadtest.locust_locustfile_configmap=eks-loadtest-locustfile \
+    --set loadtest.locust_locustfile=locustfile.py \
+    --set worker.hpa.enabled=true \
+    --set worker.hpa.minReplicas=5
+```
 
 ### STEP 2. Expose Locust via ALB
 
-TODO
+After Locust is successfully installed, create [an Ingress to expose Locust Dashboard](./walkthrough/alb-ingress.yaml) so that you can access it from a browser.
+
+```bash
+# Create Ingress using ALB
+kubectl apply -f walkthrough/alb-ingress.yaml
+```
 
 ### STEP 3. Checkout Locust Dashboard
 
-TODO
+After creating an Ingress in step 2, you will be able to get an URL of an Application Load Balancer by running the following command.
+
+```bash
+# Check
+kubectl get ingress ingress-locust-dashboad
+
+# Copy the exposed hostname to clipboard
+kubectl get ingress ingress-locust-dashboad -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' | pbcopy
+```
+
+![alb-ingress-kubectl](./walkthrough/result-images/alb-ingress-kubectl.png)
+
+You can also find the same info from AWS Console. It can be found under [EC2 > Load Balancers](https://ap-northeast-2.console.aws.amazon.com/ec2/v2/home?#LoadBalancers).
+
+![alb-ingress-aws-console](./walkthrough/result-images/alb-ingress-aws-console.png)
+
+#### _Open the URL from a browser:_
+
+![locust-dashboard-home](./walkthrough/result-images/locust-dashboard-home.png)
+
+Alternatively, you can just port-forward the connection to the locust dashboard without setting the ingress endpoint. Open your browser and connect to <http://localhost:8089>
+
+```bash
+# Port forwarding from local to locust-service resource
+kubectl port-forward svc/locust 8089:8089
+```
 
 ### STEP 4. Run Test
 
-TODO
+Enter the URL of your application that you deployed. Let’s enter `100` for the number of users and `1` for the spawn rate. Put [the endpoint URL of the workload cluster which was created before](./groundwork/install-sample-app#check-the-api-responses).
+
+<img width="900" alt="locust-dashboard-case1" src="./walkthrough/result-images/locust-dashboard-case1.png">
+
+<br>
+
+Let it run for few minutes and in the meantime, switch between the `Statistics` tab and the `Charts` tab to see how the test is unfolding.
+
+![locust-dashboard-case1-charts](./walkthrough/result-images/locust-dashboard-case1-charts.png)
+
+<br>
+
+In the statistics tab, locust briefly summarize our loads testing result. It is important not to have any noticeable fails counts while loads get spawned, especially when the cluster autoscaler triggers new nodes get provisioned and pods takes time to be initialized and get ready to takes new loads.
+
+![locust-dashboard-case1-statics](./walkthrough/result-images/locust-dashboard-case1-statics.png)
+
+<br>
+
+We can watch Cloudwatch container Insights dashboard to get the glimpse of the basic metrics of our locust namespace.  We can further experiment with the visualization of various metrics including EKS control plane by setting up Prometheus/Grafana dashboard.
+
+![cw-performance-case1-locust](./walkthrough/result-images/cw-performance-case1-locust.png)
+
+![cw-performance-case1-workload](./walkthrough/result-images/cw-performance-case1-workload.png)
+
+Everything looks fine seeing our cluster can undertake those loads without any issues. Now we can give it a little more stress. Stop the test for now and put more users in the next step. Let’s put `1,000` users with spawn rate of `10` and compare it with the previous graph.
+
+<img width="900" alt="locust-dashboard-case2" src="./walkthrough/result-images/locust-dashboard-case2.png">
+
+![locust-dashboard-case2-chart](./walkthrough/result-images/locust-dashboard-case2-charts.png)
+
+![locust-dashboard-case2-statics](./walkthrough/result-images/locust-dashboard-case2-statics.png)
+
+It looks simmilar to previous teest. It seems that the service can cover these loads.
+
+### STEP 5. Run Test (2nd)
+
+Now it’s time for a million users and examine for a prolonged time. Let’s put `1,000,000` users with spawn rate of `100`. Both workloads cluster and locust cluster itself has enough resources to cover those traffic, it shows steady upward sloping graph. Suppose we had smaller instances for our clusters or we gave load generator more cpu burden, and when the resource threshold met for cluster autoscalers to kick in to add more nodes, the graph would have reflected several sudden bumps.
+
+<img width="900" alt="locust-dashboard-case3" src="./walkthrough/result-images/locust-dashboard-case3.png">
+
+![locust-dashboard-case3-chart](./walkthrough/result-images/locust-dashboard-case3-charts.png)
+
+![locust-dashboard-case3-statics](./walkthrough/result-images/locust-dashboard-case3-statics.png)
+
+When our cluster need to scale during the high peak of loads, we may see slower response time and even get 50X HTTP responses. Then we need some techniques for our clusters to be more responsive and fault tolerant.  There are some tips that might be useful when load test your own.
+
+- Find the optimal pod’s readiness probes to minimize the time to wait for newly scaled pods.
+- Fine tune HPA/CA configuration for the specific workloads in order to the autoscaler as responsive as it can when it need to scale out.
+- HPA reaction time + CA reaction time + node provisioning time can take up to 5 minutes, and node provisioning usually takes most of that time, and it is useful to have lighter AMI and have bigger instance type to get utilize of better bin packing efficiency.
+- Check with the scaling pod’s entire lifecycle to see if there’re any bottleneck - metric scraping delay + HPA trigger for pods to scale out + container image pulling + application loading time + readiness probe delay
+- Overprovisioning employs temporary pods with negative priority and take ample space in the cluster. When the event of scaling action, it can dramatically reduce the node provisioning time and it trades cost for scheduling latency.
+- Prevent Scale Down Eviction to the CA if you node scales down during the load testing.
+- It’s all about a tradeoff between resource optimization and a cost. You need extra headroom of resources within a budget.
 
 ## Clean up
 

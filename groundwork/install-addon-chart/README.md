@@ -479,6 +479,13 @@ helm upgrade --install "addon-${AWS_LB_CNTL}" eks/aws-load-balancer-controller \
 export ADDON_NODEGROUP_ROLE_NAME=$(eksctl get nodegroup --cluster $TARGET_CLUSTER_NAME --name mng-addon --output json  | jq -r ".[0].NodeInstanceRoleARN" | cut -d '/' -f 2)
 export TARGET_NODEGROUP_ROLE_NAME=$(eksctl get nodegroup --cluster $TARGET_CLUSTER_NAME --name mng-${TARGET_GROUP_NAME} --output json  | jq -r ".[0].NodeInstanceRoleARN" | cut -d '/' -f 2)
 
+# Check
+cat <<EOF
+_______________________________________________
+* ADDON_NODEGROUP_ROLE_NAME : ${ADDON_NODEGROUP_ROLE_NAME}
+* TARGET_NODEGROUP_ROLE_NAME: ${TARGET_NODEGROUP_ROLE_NAME}
+EOF
+
 # Attach the policy
 aws iam attach-role-policy \
   --role-name ${ADDON_NODEGROUP_ROLE_NAME} \
@@ -491,7 +498,7 @@ aws iam attach-role-policy \
 aws iam list-attached-role-policies --role-name ${ADDON_NODEGROUP_ROLE_NAME} | grep CloudWatchAgentServerPolicy || echo 'Policy not found'
 aws iam list-attached-role-policies --role-name ${TARGET_NODEGROUP_ROLE_NAME} | grep CloudWatchAgentServerPolicy || echo 'Policy not found'
 
-# Output
+# Like this..
 "PolicyName": "CloudWatchAgentServerPolicy",
 "PolicyArn": "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 ```

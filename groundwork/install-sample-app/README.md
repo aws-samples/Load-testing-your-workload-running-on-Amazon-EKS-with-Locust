@@ -14,6 +14,7 @@ As the last ground work, we need to deploy app chart for workload for target of 
   - [Set context of kubectl](#set-context-of-kubectl)
   - [Prepare `values.yaml` file](#prepare-values.yaml-file)
   - [Install Chart](#install-chart)
+  - [Check the API responses](#check-the-api-responses)
 - [Tip. Clean up the workloads](#tip-clean-up-the-workloads)
 
 ## Prepare
@@ -68,7 +69,7 @@ aws ecr describe-repositories --repository-name ${ECR_REPO_NAME} --output json |
 >
 > If you want to check more information about the DockerHub's rate limits, please click [this article](https://www.docker.com/increase-rate-limits) and [the DockerHub pricing board](https://www.docker.com/pricing).
 
-### Pull a public container image
+### Pull a [public container image](https://hub.docker.com/r/dev2sponge/load-testing-spring-worker)
 
 ```bash
 docker pull dev2sponge/load-testing-spring-worker:latest
@@ -164,11 +165,12 @@ helm upgrade --install ${CHART_NAME} "${CHART_NAME}-0.1.0.tgz"
 
 # Check
 helm list | egrep "NAME |${CHART_NAME}"
-```
 
-```bash
 # Get Pods
 kubectl get pods -l "load-type" -L "load-type=on-cpu"
+
+# Describe Deployment: check 'Pod Template' and 'Events'
+kubectl describe deployment ${CHART_NAME}
 
 # Get Service
 kubectl get service ${CHART_NAME}
@@ -179,6 +181,8 @@ kubectl get ingress ${CHART_NAME}
 # Copy the Ingress Address to your clipboard
 kubectl get ingress ${CHART_NAME} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' | pbcopy
 ```
+
+### Check the API responses
 
 You can check response message in your browser like below.
 
