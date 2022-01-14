@@ -190,19 +190,20 @@ helm upgrade --install eks-loadtest-locust deliveryhero/locust \
 After Locust is successfully installed, create [an Ingress to expose Locust Dashboard](./walkthrough/alb-ingress.yaml) so that you can access it from a browser.
 
 ```bash
+# Move to the root of directory
 # Create Ingress using ALB
 kubectl apply -f walkthrough/alb-ingress.yaml
 ```
 
 ### STEP 3. Checkout Locust Dashboard
 
-After creating an Ingress in step 2, you will be able to get an URL of an Application Load Balancer by running the following command.
+After creating an Ingress in step 2, you will be able to get an URL of an Application Load Balancer by running the following command. Maybe it needs some time (2 minutes or more) to get the enpoint of ALB.
 
 ```bash
 # Check
 kubectl get ingress ingress-locust-dashboad
 
-# Copy the exposed hostname to clipboard
+# Copy the exposed hostname to clipboard (only mac osx)
 kubectl get ingress ingress-locust-dashboad -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' | pbcopy
 ```
 
