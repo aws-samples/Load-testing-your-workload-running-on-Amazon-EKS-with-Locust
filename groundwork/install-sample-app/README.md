@@ -140,7 +140,7 @@ kubectl config current-context
 
 ```bash
 # Move to 'install-sample-app' directory from root of repository
-cd groundwork/eks-clusters
+cd groundwork/install-sample-app
 
 # Create 'values.yaml' file from template
 cat workload-chart/values.template | envsubst > workload-chart/values.yaml
@@ -165,7 +165,7 @@ helm list | egrep "NAME |${CHART_NAME}"
 
 ```bash
 # Get Pods
-kubectl get pods -l "load-type" -L "load-type=on-cpu"
+kubectl get pods -L "load-type=on-cpu"
 
 # Get Service
 kubectl get service ${CHART_NAME}
