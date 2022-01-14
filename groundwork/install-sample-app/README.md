@@ -59,7 +59,7 @@ aws ecr create-repository --repository-name ${ECR_REPO_NAME} --output json | jq
 aws ecr describe-repositories --repository-name ${ECR_REPO_NAME} --output json | jq
 ```
 
-> #### Why we use the ECR Repository?**
+> #### Why we use the ECR Repository?
 >
 > In our load-testing journey, if the load increases, the EKS's MNG(Managed Nodegroup) will provision new worker nodes to allocate new pods.
 > At that point, if you use directly the public DockerHub's image, then **you will be block to pull it from the DockerHub** on your NAT Gateway's EIP address the EKS cluster has used.
