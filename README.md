@@ -84,7 +84,7 @@ Then you can check the results in AWS Consoles.
 
 ### Installing Basic Addon Charts
 
-For load-tesing on eks, we basically need to install these kubernetes addons charts. These charts are commonly used in eks clusters, thus we need to do the below installation jobs in both of clusters: `awsblog-loadtest-locust` and `awsblog-loadtest-workload` (or your other target cluster).
+For load-tesing on EKS, we basically need to install these kubernetes addons charts. These charts are commonly used in EKS clusters, thus we need to do the below installation jobs in both of clusters: `awsblog-loadtest-locust` and `awsblog-loadtest-workload` (or your other target cluster).
 
 - [Deploy Metrics server (YAML)](./groundwork/install-addon-chart#deploy-metrics-server-yaml)
 - [Skip installation step for HPA(Horizontal Pod Autoscaler)](./groundwork/install-addon-chart#skip-installation-step-for-hpa)
