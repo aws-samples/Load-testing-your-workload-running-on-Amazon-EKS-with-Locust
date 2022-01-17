@@ -27,7 +27,7 @@ TODO: single line message to introduce this contents
 
 ## Introduction
 
-More and more customers are using Elastic Kubernetes Service (EKS) to run their workload on AWS. This is why it is essential to have a process to test your EKS cluster so that you can identify weaknesses upfront and optimize your cluster before you open it to public. Load test focuses on the performance and reliability of the cluster and it is especially important for those expect high elasticity from EKS. [Locust](https://locust.io/) is one of the popular open source load testing tools that comes with a real-time dashboard and programmable test scenarios.
+More and more customers are using Elastic Kubernetes Service (EKS) to run their workload on AWS. This is why it is essential to have a process to test your EKS cluster so that you can identify weaknesses upfront and optimize your cluster before you open it to public. Load test focuses on the performance and reliability of the cluster and it is especially important for those expect high elasticity from EKS. [Locust](https://locust.io/) is an open source load testing tools that comes with a real-time dashboard and programmable test scenarios.
 
 In this post, I walk you through the steps to build two Amazon EKS clusters, one for generating loads using [Locust](https://locust.io/) and another for running a sample workload. The concepts in this post are applicable to any situation where you want to test the performance and reliability of your Amazon [EKS cluster](https://aws.amazon.com/eks).
 
