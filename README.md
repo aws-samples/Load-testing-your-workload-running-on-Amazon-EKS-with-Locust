@@ -5,6 +5,7 @@ TODO: single line message to introduce this contents
 ## Table of content
 
 - [Introduction](#introduction)
+- [Overview of solution](#overview-of-solution)
 - [Groundwork](#groundwork)
   - [Prerequisites](#prerequisites)
   - [Provisioning EKS Clusters](#provisioning-eks-clusters)
@@ -33,7 +34,7 @@ In this post, I walk you through the steps to build two Amazon EKS clusters, one
 
 You can find all of the code and resources used throughout this post in [the associated GitHub repository](https://github.com/aws-samples/load-testing-eks-cluster-with-locust).
 
-Solution background
+## Overview of solution
 
 The following diagram illustrates the architecture we use across this post. Your application is running as a group of pods in an EKS cluster (target cluster) and exposed via a public load balancer. Locust, in the meantime, is running in a separate EKS cluster (locust cluster). [Cluster Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html) and [Horizontal Pod Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/horizontal-pod-autoscaler.html) will be configured on both clusters to respond to the need for scaling out in terms of the number of nodes and pods respectively.
 
