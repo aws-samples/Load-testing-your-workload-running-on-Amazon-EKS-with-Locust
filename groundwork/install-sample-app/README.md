@@ -21,8 +21,12 @@ As the last ground work, we need to deploy app chart for workload for target of 
 ### Prerequisites
 
 - Docker
-  - In Mac or Windows: [docker-desktop](https://www.docker.com/products/docker-desktop)
-  - In Amazon Linux 2: [docker-engine](https://gist.github.com/npearce/6f3c7826c7499587f00957fee62f8ee9#file-install-docker-md)
+  - In Mac or Windows
+    - [docker-desktop](https://www.docker.com/products/docker-desktop): easy to setup
+    - docker-engine using [minikube](https://minikube.sigs.k8s.io/docs/start/) with [`docker-env` setting](https://minikube.sigs.k8s.io/docs/commands/docker-env/)
+      : way to use free in group or enterprise side
+  - In Amazon Linux 2
+    - [docker-engine](https://gist.github.com/npearce/6f3c7826c7499587f00957fee62f8ee9#file-install-docker-md)
 - [yq](https://github.com/mikefarah/yq/#install)
 
 ### Set environment
@@ -59,7 +63,7 @@ aws ecr create-repository --repository-name ${ECR_REPO_NAME} --output json | jq
 aws ecr describe-repositories --repository-name ${ECR_REPO_NAME} --output json | jq
 ```
 
-> #### Why we use the ECR Repository?**
+> #### Why we use the ECR Repository?
 >
 > In our load-testing journey, if the load increases, the EKS's MNG(Managed Nodegroup) will provision new worker nodes to allocate new pods.
 > At that point, if you use directly the public DockerHub's image, then **you will be block to pull it from the DockerHub** on your NAT Gateway's EIP address the EKS cluster has used.
@@ -140,7 +144,7 @@ kubectl config current-context
 
 ```bash
 # Move to 'install-sample-app' directory from root of repository
-cd groundwork/eks-clusters
+cd groundwork/install-sample-app
 
 # Create 'values.yaml' file from template
 cat workload-chart/values.template | envsubst > workload-chart/values.yaml
@@ -165,7 +169,7 @@ helm list | egrep "NAME |${CHART_NAME}"
 
 ```bash
 # Get Pods
-kubectl get pods -l "load-type" -L "load-type=on-cpu"
+kubectl get pods -L "load-type=on-cpu"
 
 # Get Service
 kubectl get service ${CHART_NAME}
