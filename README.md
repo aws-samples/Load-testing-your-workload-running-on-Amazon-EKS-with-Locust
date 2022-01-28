@@ -106,8 +106,6 @@ Then you can check the result like this.
 
 ![ingress-load-gen.png](./groundwork/install-sample-app/ingress-load-gen.png)
 
-Nice! It's done :)
-
 ## Walkthrough
 
 You now have the Kubernetes side ready, but there are still a few things left to configure before we start testing your application.
@@ -188,7 +186,7 @@ helm upgrade --install eks-loadtest-locust deliveryhero/locust \
 
 ### STEP 2. Expose Locust via ALB
 
-After Locust is successfully installed, create [an Ingress to expose Locust Dashboard](./walkthrough/alb-ingress.yaml) so that you can access it from a browser.
+After Locust is successfully installed, create [an Ingress to expose Locust Dashboard](./walkthrough/alb-ingress.yaml) so that you can access it from a browser. Maybe it needs some time (2 minutes or more) to get the enpoint of ALB.
 
 ```bash
 # Move to the root of directory
@@ -229,7 +227,7 @@ kubectl port-forward svc/locust 8089:8089
 
 Enter the URL of your application that you deployed. Let’s enter `100` for the number of users and `1` for the spawn rate. Put [the endpoint URL of the workload cluster which was created before](./groundwork/install-sample-app#check-the-api-responses).
 
-<img width="900" alt="locust-dashboard-case1" src="./walkthrough/result-images/locust-dashboard-case1.png">
+<img width="450" alt="locust-dashboard-case1" src="./walkthrough/result-images/locust-dashboard-case1.png">
 
 <br>
 
@@ -253,7 +251,7 @@ We can watch Cloudwatch container Insights dashboard to get the glimpse of the b
 
 Everything looks fine seeing our workload cluster can undertake those loads without any issues. Now we can give it a little more stress. Stop the test for now and put more users in the next step. Let’s put `1,000` users with spawn rate of `10` and compare it with the previous graph.
 
-<img width="900" alt="locust-dashboard-case2" src="./walkthrough/result-images/locust-dashboard-case2.png">
+<img width="450" alt="locust-dashboard-case2" src="./walkthrough/result-images/locust-dashboard-case2.png">
 
 ![locust-dashboard-case2-chart](./walkthrough/result-images/locust-dashboard-case2-charts.png)
 
@@ -265,7 +263,7 @@ It looks simmilar to previous teest. It seems that the service can cover these l
 
 Now it’s time for a million users and examine for a prolonged time. Let’s put `1,000,000` users with spawn rate of `100`. Both workloads cluster and locust cluster itself has enough resources to cover those traffic, it shows steady upward sloping graph. Suppose we had smaller instances for our clusters or we gave load generator more cpu burden, and when the resource threshold met for cluster autoscalers to kick in to add more nodes, the graph would have reflected several sudden bumps.
 
-<img width="900" alt="locust-dashboard-case3" src="./walkthrough/result-images/locust-dashboard-case3.png">
+<img width="450" alt="locust-dashboard-case3" src="./walkthrough/result-images/locust-dashboard-case3.png">
 
 ![locust-dashboard-case3-chart](./walkthrough/result-images/locust-dashboard-case3-charts.png)
 
@@ -286,18 +284,29 @@ When our cluster need to scale during the high peak of loads, we may see slower 
 When you are done with your tests, clean up all the testing resources.
 
 ```bash
-# Clean Up Workload Cluster
-# Switch Context to executes commands on the workload cluster
-# Unset context - Optional
-kubectl config unset current-context
+# Setting to clean up target EKS cluster: Workload / Locust
 
+# Set optional environment variables
+export AWS_PROFILE="YOUR_PROFILE" # If not, use 'default' profile
+export AWS_REGION="YOUR_REGION"   # ex. ap-northeast-2
+
+# Set common environment variables
+export TARGET_GROUP_NAME="workload"
+export TARGET_CLUSTER_NAME="awsblog-loadtest-${TARGET_GROUP_NAME}"
+
+# Switch Context to executes commands on the target cluster: Workload / Locust
+# Unset context
+kubectl config unset current-context
 # Set context of workload cluster
-export WORKLOAD_CLUSTER_NAME="awsblog-loadtest-workload"
-export WORKLOAD_CONTEXT=$(kubectl config get-contexts | grep "${WORKLOAD_CLUSTER_NAME}" | awk -F" " '{print $1}')
-kubectl config use-context ${WORKLOAD_CONTEXT}
+export TARGET_CONTEXT=$(kubectl config get-contexts | grep "${TARGET_CLUSTER_NAME}" | awk -F" " '{print $1}')
+kubectl config use-context ${TARGET_CONTEXT}
 
 # Check if current context set to run on workload cluster
 kubectl config current-context
+```
+
+```bash
+# Clean up target EKS cluster: Workload / Locust
 
 # Uninstall Helm Charts
 helm list -A |grep -v NAME |awk -F" " '{print "helm -n "$2" uninstall "$1}' |xargs -I {} sh -c '{}'
@@ -305,32 +314,14 @@ helm list -A |grep -v NAME |awk -F" " '{print "helm -n "$2" uninstall "$1}' |xar
 # Check Empty Helm List
 helm list -A
 
-# Delete EKS Cluster
-eksctl delete cluster --name="awsblog-loadtest-workload"
+# Delete IRSA setting (must run before delete the cluster!)
+eksctl delete iamserviceaccount --cluster "${TARGET_CLUSTER_NAME}" \
+  --namespace "kube-system" --name "${CA:-cluster-autoscaler}"
+eksctl delete iamserviceaccount --cluster "${TARGET_CLUSTER_NAME}" \
+  --namespace "kube-system" --name "${AWS_LB_CNTL:-aws-load-balancer-controller}"
 
-# Delete ECR Repository
-aws ecr delete-repository --repository-name "${ECR_REPO_NAME:-sample-application}"
-
-# Clean Up Locust Cluster
-# Switch Context to executes commands on the locust cluster
-# Unset context - Optional
-kubectl config unset current-context
-
-# Set context of locust cluster
-export LOCUST_CLUSTER_NAME="awsblog-loadtest-locust"
-export LOCUST_CONTEXT=$(kubectl config get-contexts | grep "${LOCUST_CLUSTER_NAME}" | awk -F" " '{print $1}')
-kubectl config use-context ${LOCUST_CONTEXT}
-
-# Check if current context set to run on locust cluster
-kubectl config current-context
-# Uninstall Helm Charts
-helm list -A |grep -v NAME |awk -F" " '{print "helm -n "$2" uninstall "$1}' |xargs -I {} sh -c '{}'
-
-# Check Empty Helm List
-helm list -A
-
-# Delete EKS Cluster
-eksctl delete cluster --name="awsblog-loadtest-locust"
+# Delete target EKS cluster: Workload / Locust
+eksctl delete cluster --name="${TARGET_CLUSTER_NAME}"
 ```
 
 It’s done. One things to note, don’t forget to remove **both clusters: `Locust` and `Workload`**.
