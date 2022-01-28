@@ -1,6 +1,10 @@
 # Load testing EKS cluster with Locust
 
-TODO: single line message to introduce this contents
+This repository contains example code for creating EKS clusters and installing necessary addons such as [Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) and [AWS Load Balancer Controller](https://github.com/aws/eks-charts/tree/master/stable/aws-load-balancer-controller) and [Locust](https://github.com/deliveryhero/helm-charts/tree/master/stable/locust).
+
+In addition, it provides sample application to be used for testing. Please feel free to replace it with your own application.
+
+For full details about using Locust, please see the [Locust official documentation](http://docs.locust.io/en/stable/).
 
 ## Table of content
 
