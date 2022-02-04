@@ -85,12 +85,15 @@ eksctl create cluster --with-oidc -f "${TARGET_CLUSTER_NAME}.yaml"
 
 ```bash
 # Create kubeconfig for your kubectl
-eksctl utils write-kubeconfig --cluster ${TARGET_CLUSTER_NAME}
+eksctl utils write-kubeconfig \
+  --cluster "${TARGET_CLUSTER_NAME}" \
+  --region "${TARGET_REGION}" \
+  --profile "${AWS_PROFILE:-(default)}"
 ```
 
 ```bash
 # Check kubeconfig context
-kubectl config current-context | grep "${TARGET_CLUSTER_NAME}"
+kubectl config current-context
 
 # Like this..
 # <IAM_ROLE>@<TARGET_CLUSTER_NAME>.<TARGET_REGION>.eksctl.io

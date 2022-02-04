@@ -14,6 +14,7 @@ As the last ground work, we need to deploy app chart for workload for target of 
   - [Set context of kubectl](#set-context-of-kubectl)
   - [Prepare `values.yaml` file](#prepare-values.yaml-file)
   - [Install Chart](#install-chart)
+  - [Check the API responses](#check-the-api-responses)
 - [Tip. Clean up the workloads](#tip-clean-up-the-workloads)
 
 ## Prepare
@@ -35,9 +36,9 @@ As the last ground work, we need to deploy app chart for workload for target of 
 # Set optional environment variables
 export AWS_PROFILE="YOUR_PROFILE" # If not, use 'default' profile
 export AWS_REGION="YOUR_REGION"   # ex. ap-northeast-2
+export ACCOUNT_ID=$(aws sts get-caller-identity --output json | jq ".Account" | tr -d '"')
 
 # Set specific environment variables
-export ACCOUNT_ID=$(aws sts get-caller-identity --output json | jq ".Account" | tr -d '"')
 export ECR_URL="${ACCOUNT_ID}.dkr.ecr.${TARGET_REGION}.amazonaws.com"
 export ECR_REPO_NAME="sample-application"
 
@@ -46,8 +47,8 @@ cat <<EOF
 _______________________________________________
 * AWS_PROFILE   : ${AWS_PROFILE:-(default)}
 * AWS_REGION    : ${AWS_REGION:-(invalid!)}
-_______________________________________________
 * ACCOUNT_ID    : ${ACCOUNT_ID:-(invalid!)}
+_______________________________________________
 * ECR_URL       : ${ECR_URL}
 * ECR_REPO_NAME : ${ECR_REPO_NAME}
 EOF
@@ -72,7 +73,7 @@ aws ecr describe-repositories --repository-name ${ECR_REPO_NAME} --output json |
 >
 > If you want to check more information about the DockerHub's rate limits, please click [this article](https://www.docker.com/increase-rate-limits) and [the DockerHub pricing board](https://www.docker.com/pricing).
 
-### Pull a public container image
+### Pull a [public container image](https://hub.docker.com/r/dev2sponge/load-testing-spring-worker)
 
 ```bash
 docker pull dev2sponge/load-testing-spring-worker:latest
@@ -131,13 +132,16 @@ aws ecr list-images --repository-name ${ECR_REPO_NAME} --output json | jq -c '.i
 # Unset context
 kubectl config unset current-context
 
-# Set context of workload cluster
+# Set Workload Cluster Context
 export WORKLOAD_CLUSTER_NAME="awsblog-loadtest-workload"
-export WORKLOAD_CONTEXT=$(kubectl config get-contexts | grep "${WORKLOAD_CLUSTER_NAME}" | awk -F" " '{print $1}')
+export WORKLOAD_CONTEXT=$(kubectl config get-contexts | sed 's/\*/ /g' | grep "@${WORKLOAD_CLUSTER_NAME}." | awk -F" " '{print $1}')
 kubectl config use-context ${WORKLOAD_CONTEXT}
 
 # Check
 kubectl config current-context
+
+# Like this..
+# <IAM_ROLE>@awsblog-loadtest-workload.<TARGET_REGION>.eksctl.io
 ```
 
 ### Prepare `values.yaml` file
@@ -165,11 +169,12 @@ helm upgrade --install ${CHART_NAME} "${CHART_NAME}-0.1.0.tgz"
 
 # Check
 helm list | egrep "NAME |${CHART_NAME}"
-```
 
-```bash
 # Get Pods
 kubectl get pods -L "load-type=on-cpu"
+
+# Describe Deployment: check 'Pod Template' and 'Events'
+kubectl describe deployment ${CHART_NAME}
 
 # Get Service
 kubectl get service ${CHART_NAME}
@@ -178,8 +183,10 @@ kubectl get service ${CHART_NAME}
 kubectl get ingress ${CHART_NAME}
 
 # Copy the Ingress Address to your clipboard
-kubectl get ingress ${CHART_NAME} | grep -v NAME | awk -F" " '{print $4}' | pbcopy
+kubectl get ingress ${CHART_NAME} -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' | pbcopy
 ```
+
+### Check the API responses
 
 You can check response message in your browser like below.
 

@@ -14,15 +14,14 @@ Here is the list.
 
 ## Environment Settings
 
-📌 **Switch to locust cluster context for `kubectl`**
-
 ```bash
 # Set optional environment variables
 export AWS_PROFILE="YOUR_PROFILE" # If not, use 'default' profile
 export AWS_REGION="YOUR_REGION"   # ex. ap-northeast-2
+export ACCOUNT_ID=$(aws sts get-caller-identity --output json | jq ".Account" | tr -d '"')
 
 # Set common environment variables
-export TARGET_GROUP_NAME="locust"
+export TARGET_GROUP_NAME="locust" # Maybe use 'workload' at here, cause of the end of this document
 export TARGET_CLUSTER_NAME="awsblog-loadtest-${TARGET_GROUP_NAME}"
 export TARGET_REGION="${AWS_REGION}"
 
@@ -31,6 +30,7 @@ cat <<EOF
 _______________________________________________
 * AWS_PROFILE : ${AWS_PROFILE:-(default)}
 * AWS_REGION  : ${AWS_REGION:-(invalid!)}
+* ACCOUNT_ID  : ${ACCOUNT_ID:-(invalid!)}
 _______________________________________________
 * TARGET_GROUP_NAME   : ${TARGET_GROUP_NAME}
 * TARGET_CLUSTER_NAME : ${TARGET_CLUSTER_NAME}
@@ -38,29 +38,28 @@ _______________________________________________
 EOF
 ```
 
-```bash
-# Get Locust Cluster Context
-export WORKLOAD_CONTEXT=$(kubectl config get-contexts | sed 's/\*/ /g' | grep ${TARGET_CLUSTER_NAME} | awk -F" " '{print $1}')
-# Switch context
-kubectl config use-context ${WORKLOAD_CONTEXT}
-# Check
-kubectl config current-context
-```
-
 📌 **Check your profile for `eksctl`**
 
 ```bash
-# Set Profile
-export AWS_PROFILE="YOUR_PROFILE_NAME"
 # Check eksctl find out the cluster
-eksctl get clusters | egrep "NAME|${TARGET_CLUSTER_NAME}"
+eksctl get clusters --region "${TARGET_REGION}" | egrep "NAME|${TARGET_CLUSTER_NAME}"
 ```
 
-📌 **Set environments**
+📌 **Check your cluster context for `kubectl`**
 
 ```bash
-# AWS Profile Environments
-export ACCOUNT_ID=$(aws sts get-caller-identity --output json | jq ".Account" | tr -d '"')
+# Unset context - Optional
+kubectl config unset current-context
+
+# Set Cluster Context: 1. Locust / 2. Workload
+export TARGET_CLUSTER_NAME=$(kubectl config get-contexts | sed 's/\*/ /g' | grep "@${TARGET_CLUSTER_NAME}." | awk -F" " '{print $1}')
+kubectl config use-context ${TARGET_CLUSTER_NAME}
+
+# Check
+kubectl config current-context
+
+# Like this..
+# <IAM_ROLE>@<TARGET_CLUSTER_NAME>.<TARGET_REGION>.eksctl.io
 ```
 
 ---
@@ -258,7 +257,7 @@ kubectl -n kube-system label sa "${CA}" \
 
 ```bash
 # Helm chart repo setting
-helm repo add autoscaler https://kubernetes.github.io/autoscaler
+helm repo add autoscaler "https://kubernetes.github.io/autoscaler"
 helm repo update autoscaler
 
 # Prepare values file
@@ -410,7 +409,7 @@ export AWS_LB_CNTL="aws-load-balancer-controller"
 
 ```bash
 # Helm chart repo setting
-helm repo add eks https://aws.github.io/eks-charts
+helm repo add eks "https://aws.github.io/eks-charts"
 helm repo update eks
 
 # Install TargetGroupBinding CRDs
@@ -482,6 +481,13 @@ helm upgrade --install "addon-${AWS_LB_CNTL}" eks/aws-load-balancer-controller \
 export ADDON_NODEGROUP_ROLE_NAME=$(eksctl get nodegroup --cluster $TARGET_CLUSTER_NAME --name mng-addon --output json  | jq -r ".[0].NodeInstanceRoleARN" | cut -d '/' -f 2)
 export TARGET_NODEGROUP_ROLE_NAME=$(eksctl get nodegroup --cluster $TARGET_CLUSTER_NAME --name mng-${TARGET_GROUP_NAME} --output json  | jq -r ".[0].NodeInstanceRoleARN" | cut -d '/' -f 2)
 
+# Check
+cat <<EOF
+_______________________________________________
+* ADDON_NODEGROUP_ROLE_NAME : ${ADDON_NODEGROUP_ROLE_NAME}
+* TARGET_NODEGROUP_ROLE_NAME: ${TARGET_NODEGROUP_ROLE_NAME}
+EOF
+
 # Attach the policy
 aws iam attach-role-policy \
   --role-name ${ADDON_NODEGROUP_ROLE_NAME} \
@@ -494,7 +500,7 @@ aws iam attach-role-policy \
 aws iam list-attached-role-policies --role-name ${ADDON_NODEGROUP_ROLE_NAME} | grep CloudWatchAgentServerPolicy || echo 'Policy not found'
 aws iam list-attached-role-policies --role-name ${TARGET_NODEGROUP_ROLE_NAME} | grep CloudWatchAgentServerPolicy || echo 'Policy not found'
 
-# Output
+# Like this..
 "PolicyName": "CloudWatchAgentServerPolicy",
 "PolicyArn": "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 ```
