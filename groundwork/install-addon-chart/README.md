@@ -196,6 +196,7 @@ eksctl create iamserviceaccount \
     --cluster "${TARGET_CLUSTER_NAME}" \
     --namespace kube-system \
     --name "${CA}" \
+    --role-name "${TARGET_CLUSTER_NAME}-${CA}" \
     --attach-policy-arn "arn:aws:iam::${ACCOUNT_ID}:policy/${CA_POLICY_NAME}" \
     --override-existing-serviceaccounts \
     --approve
@@ -360,6 +361,7 @@ export AWS_LB_CNTL="aws-load-balancer-controller"
       --cluster "${TARGET_CLUSTER_NAME}" \
       --namespace kube-system \
       --name "${AWS_LB_CNTL}" \
+      --role-name "${TARGET_CLUSTER_NAME}-${AWS_LB_CNTL}" \
       --attach-policy-arn "arn:aws:iam::${ACCOUNT_ID}:policy/${AWS_LB_CNTL_POLICY_NAME}" \
       --override-existing-serviceaccounts \
       --approve
