@@ -312,7 +312,7 @@ kubectl config current-context
 ```bash
 # Clean up target EKS cluster: Workload / Locust
 
-# Uninstall Helm Charts
+# Uninstall All Helm Charts
 helm list -A |grep -v NAME |awk -F" " '{print "helm -n "$2" uninstall "$1}' |xargs -I {} sh -c '{}'
 
 # Check Empty Helm List
@@ -326,6 +326,9 @@ eksctl delete iamserviceaccount --cluster "${TARGET_CLUSTER_NAME}" \
 
 # Delete target EKS cluster: Workload / Locust
 eksctl delete cluster --name="${TARGET_CLUSTER_NAME}"
+
+# Delete ECR Repository: Workload only
+aws ecr delete-repository --repository-name "${ECR_REPO_NAME:-sample-application}"
 ```
 
 It’s done. One things to note, don’t forget to remove **both clusters: `Locust` and `Workload`**.
