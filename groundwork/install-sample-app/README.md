@@ -3,19 +3,21 @@
 As the last ground work, we need to deploy app chart for workload for target of load-testing.
 (If you already have workload to follow our journey, you can use yours.)
 
-- [Prepare](#prepare)
-  - [Prerequisites](#prerequisites)
-  - [Set environment](#set-environment)
-  - [Create an ECR repository](#create-an-ecr-repository)
-  - [Pull a public container image](#pull-a-public-container-image)
-  - [Tag this image](#tag-this-image)
-  - [Push the image tag]
-- [Install Workload Application (Helm Chart)](#install-workload-application-helm-chart)
-  - [Set context of kubectl](#set-context-of-kubectl)
-  - [Prepare `values.yaml` file](#prepare-values.yaml-file)
-  - [Install Chart](#install-chart)
-  - [Check the API responses](#check-the-api-responses)
-- [Tip. Clean up the workloads](#tip-clean-up-the-workloads)
+- [Install Sample Application](#install-sample-application)
+  - [Prepare](#prepare)
+    - [Prerequisites](#prerequisites)
+    - [Set environment](#set-environment)
+    - [Create an ECR repository](#create-an-ecr-repository)
+    - [Pull a public container image](#pull-a-public-container-image)
+      - [(Option) Test this container image](#option-test-this-container-image)
+    - [Tag this image](#tag-this-image)
+    - [Push the image tag](#push-the-image-tag)
+  - [Install Workload Application (Helm Chart)](#install-workload-application-helm-chart)
+    - [Set context of kubectl](#set-context-of-kubectl)
+    - [Prepare `values.yaml` file](#prepare-valuesyaml-file)
+    - [Install Chart](#install-chart)
+    - [Check the API responses](#check-the-api-responses)
+  - [Tip. Clean up the workloads](#tip-clean-up-the-workloads)
 
 ## Prepare
 
@@ -39,7 +41,7 @@ export AWS_REGION="YOUR_REGION"   # ex. ap-northeast-2
 export ACCOUNT_ID=$(aws sts get-caller-identity --output json | jq ".Account" | tr -d '"')
 
 # Set specific environment variables
-export ECR_URL="${ACCOUNT_ID}.dkr.ecr.${TARGET_REGION}.amazonaws.com"
+export ECR_URL="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
 export ECR_REPO_NAME="sample-application"
 
 # Check
