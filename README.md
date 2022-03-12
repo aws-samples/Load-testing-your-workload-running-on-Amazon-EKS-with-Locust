@@ -78,7 +78,7 @@ If you already have clusters, you can skip this steps.
 - [Create Locust Cluster](./groundwork/eks-clusters#create-locust-cluster)
 - [Create Workload Cluster](./groundwork/eks-clusters#create-workload-cluster) (option)
 
-One thing to note is that the default VPC limit is 5 per region, so if you do not have enough resources in your environment, the above cluster creation will fail.
+Please check your AWS Account limits to ensure you can provision 2 VPCs, so if you do not have enough resources in your environment, the above cluster creation will fail.
 
 Then you can check the results in AWS Consoles.
 
