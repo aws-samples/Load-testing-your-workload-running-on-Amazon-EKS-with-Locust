@@ -8,27 +8,30 @@ For full details about using Locust, please see the [Locust official documentati
 
 ## Table of content
 
-- [Introduction](#introduction)
-- [Overview of solution](#overview-of-solution)
-- [Groundwork](#groundwork)
-  - [Prerequisites](#prerequisites)
-  - [Provisioning EKS Clusters](#provisioning-eks-clusters)
-  - [Installing Basic Addon Charts](#installing-basic-addon-charts)
-  - [Installing a Sample Application Helm Chart](#installing-a-sample-application-helm-chart)
-- [Walkthrough](#walkthrough)
-  - [STEP 1. Install Locust](#step-1-install-locust)
-    - [Switch kubernetes context to run commands on the locust cluster](#switch-kubernetes-context-to-run-commands-on-the-locust-cluster)
-    - [Add Delivery Hero public chart repo](#add-delivery-hero-public-chart-repo)
-    - [Write a locustfile.py](#write-a-locustfile.py)
-    - [Install and Configure Locust with locustfile.py](#install-and-configure-locust-with-locustfile.py)
-  - [STEP 2. Expose Locust via ALB](#step-2-expose-locust-via-alb)
-  - [STEP 3. Checkout Locust Dashboard](#step-3-checkout-locust-dashboard)
-  - [STEP 4. Run Test](#step-4-run-test)
-  - [STEP 5. Run Test (2nd)](#step-5-run-test-2nd)
-- [Clean up](#clean-up)
-- [Summary](#summary)
-- [Security](#security)
-- [License](#license)
+- [Load testing EKS cluster with Locust](#load-testing-eks-cluster-with-locust)
+  - [Table of content](#table-of-content)
+  - [Introduction](#introduction)
+  - [Overview of solution](#overview-of-solution)
+  - [Groundwork](#groundwork)
+    - [Prerequisites](#prerequisites)
+    - [Provisioning EKS Clusters](#provisioning-eks-clusters)
+    - [Installing Basic Addon Charts](#installing-basic-addon-charts)
+    - [Installing a Sample Application Helm Chart](#installing-a-sample-application-helm-chart)
+  - [Walkthrough](#walkthrough)
+    - [STEP 1. Install Locust](#step-1-install-locust)
+      - [_Switch kubernetes context to run commands on the locust cluster:_](#switch-kubernetes-context-to-run-commands-on-the-locust-cluster)
+      - [_Add Delivery Hero public chart repo:_](#add-delivery-hero-public-chart-repo)
+      - [_Write a `locustfile.py` file:_](#write-a-locustfilepy-file)
+      - [Install and Configure Locust with locustfile.py](#install-and-configure-locust-with-locustfilepy)
+    - [STEP 2. Expose Locust via ALB](#step-2-expose-locust-via-alb)
+    - [STEP 3. Checkout Locust Dashboard](#step-3-checkout-locust-dashboard)
+      - [_Open the URL from a browser:_](#open-the-url-from-a-browser)
+    - [STEP 4. Run Test](#step-4-run-test)
+    - [STEP 5. Run Test (2nd)](#step-5-run-test-2nd)
+  - [Clean up](#clean-up)
+  - [Summary](#summary)
+  - [Security](#security)
+  - [License](#license)
 
 ## Introduction
 
@@ -261,7 +264,7 @@ Everything looks fine seeing our workload cluster can undertake those loads with
 
 ![locust-dashboard-case2-statics](./walkthrough/result-images/locust-dashboard-case2-statics.png)
 
-It looks simmilar to previous teest. It seems that the service can cover these loads.
+It looks similar to previous test. It seems that the service can cover these loads.
 
 ### STEP 5. Run Test (2nd)
 
