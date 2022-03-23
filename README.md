@@ -256,7 +256,9 @@ We can watch Cloudwatch container Insights dashboard to get the glimpse of the b
 
 ![cw-performance-case1-workload](./walkthrough/result-images/cw-performance-case1-workload.png)
 
-Everything looks fine seeing our workload cluster can undertake those loads without any issues. Now we can give it a little more stress. Stop the test for now and put more users in the next step. Let’s put `1,000` users with spawn rate of `10` and compare it with the previous graph.
+The test shows that the target workload running on EKS can handle requests from 100 users within sensible response. You can take a up-close look on the performance metrics of the cluster from CloudWatch Container Insights. For advice on how to monitor the EKS Kubernetes Control Plane performance please see <https://aws.github.io/aws-eks-best-practices/reliability/docs/controlplane/>.
+
+Now we can give it a little more stress. Stop the test for now and put more users. Let’s put 1,000 users with spawn rate of 10 and compare it with the previous graph.
 
 <img width="450" alt="locust-dashboard-case2" src="./walkthrough/result-images/locust-dashboard-case2.png">
 
