@@ -69,7 +69,7 @@ Install CLI tools and settings.
 - [Setting AWS Profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) ([with minimum IAM policies](https://eksctl.io/usage/minimum-iam-policies/)):
   `aws sts get-caller-identity`
 - Pull this repository:
-  `git clone https://github.com/aws-samples/load-testing-eks-cluster-with-locust`
+  `https://github.com/aws-samples/load-testing-eks-cluster-with-locust.git`
 
 ### Provisioning EKS Clusters
 
