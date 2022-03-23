@@ -282,7 +282,7 @@ When our cluster need to scale during the high peak of loads, we may see slower 
 
 - Find the optimal pod’s readiness probes to minimize the time to wait for newly scaled pods.
 - Fine tune HPA/CA configuration for the specific workloads in order to the autoscaler as responsive as it can when it need to scale out.
-- HPA reaction time + CA reaction time + node provisioning time can take up to 5 minutes, and node provisioning usually takes most of that time, and it is useful to have lighter AMI and have bigger instance type to get utilize of better bin packing efficiency.
+- HPA reaction time + CA reaction time + node provisioning time can take up to 5 minutes or more, and node provisioning usually takes most of that time, and it is useful to have lighter AMI and have bigger instance type to get utilize of better bin packing efficiency.
 - Check with the scaling pod’s entire lifecycle to see if there’re any bottleneck - metric scraping delay + HPA trigger for pods to scale out + container image pulling + application loading time + readiness probe delay
 - Overprovisioning employs temporary pods with negative priority and take ample space in the cluster. When the event of scaling action, it can dramatically reduce the node provisioning time and it trades cost for scheduling latency.
 - Prevent Scale Down Eviction to the CA if you node scales down during the load testing.
