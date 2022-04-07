@@ -1,4 +1,4 @@
-# Load testing EKS cluster with Locust
+# Load testing your workload running on Amazon EKS with Locust
 
 This repository contains example code for creating EKS clusters and installing necessary addons such as [Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) and [AWS Load Balancer Controller](https://github.com/aws/eks-charts/tree/master/stable/aws-load-balancer-controller) and [Locust](https://github.com/deliveryhero/helm-charts/tree/master/stable/locust).
 
@@ -8,7 +8,7 @@ For full details about using Locust, please see the [Locust official documentati
 
 ## Table of content
 
-- [Load testing EKS cluster with Locust](#load-testing-eks-cluster-with-locust)
+- [Load testing your workload running on Amazon EKS with Locust](#load-testing-your-workload-running-on-amazon-eks-with-locust)
   - [Table of content](#table-of-content)
   - [Introduction](#introduction)
   - [Overview of solution](#overview-of-solution)
@@ -68,8 +68,8 @@ Install CLI tools and settings.
 - [awscli v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html)
 - [Setting AWS Profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) ([with minimum IAM policies](https://eksctl.io/usage/minimum-iam-policies/)):
   `aws sts get-caller-identity`
-- Pull this repository:
-  `https://github.com/aws-samples/load-testing-eks-cluster-with-locust.git`
+- Prepare git repository:
+  `https://github.com/aws-samples/Load-testing-your-workload-running-on-Amazon-EKS-with-Locust.git`
 
 ### Provisioning EKS Clusters
 
@@ -282,11 +282,12 @@ When our cluster need to scale during the high peak of loads, we may see slower 
 
 - Find the optimal pod’s readiness probes to minimize the time to wait for newly scaled pods.
 - Fine tune HPA/CA configuration for the specific workloads in order to the autoscaler as responsive as it can when it need to scale out.
-- HPA reaction time + CA reaction time + node provisioning time can take up to 5 minutes or more, and node provisioning usually takes most of that time, and it is useful to have lighter AMI and have bigger instance type to get utilize of better bin packing efficiency.
+- HPA reaction time + CA reaction time + node provisioning time can take up to 5 minutes or more, and node provisioning usually takes most of that time, and it is useful to have an ligher AMI based on [EKS Optimised AMI](https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html) and have bigger instance type to get utilize of better bin packing efficiency.
 - Check with the scaling pod’s entire lifecycle to see if there’re any bottleneck - metric scraping delay + HPA trigger for pods to scale out + container image pulling + application loading time + readiness probe delay
 - Overprovisioning employs temporary pods with negative priority and take ample space in the cluster. When the event of scaling action, it can dramatically reduce the node provisioning time and it trades cost for scheduling latency.
-- Prevent Scale Down Eviction to the CA if you node scales down during the load testing.
+- Prevent Scale Down Eviction to the CA if you node scales down during the load testing. For more information about preventing scale down eviction, see [Cluster-Autoscaler - EKS Best Practices Guides](https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/#prevent-scale-down-eviction).
 - It’s all about a tradeoff between resource optimization and a cost. You need extra headroom of resources within a budget.
+- For more information about Autosacling on EKS, please read the [EKS Best Practice Guide](https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/#optimizing-for-performance-and-scalability).
 
 ## Clean up
 
