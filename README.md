@@ -1,4 +1,4 @@
-# Load testing EKS cluster with Locust
+# Load testing your workload running on Amazon EKS with Locust
 
 This repository contains example code for creating EKS clusters and installing necessary addons such as [Cluster Autoscaler](https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler) and [AWS Load Balancer Controller](https://github.com/aws/eks-charts/tree/master/stable/aws-load-balancer-controller) and [Locust](https://github.com/deliveryhero/helm-charts/tree/master/stable/locust).
 
@@ -8,31 +8,34 @@ For full details about using Locust, please see the [Locust official documentati
 
 ## Table of content
 
-- [Introduction](#introduction)
-- [Overview of solution](#overview-of-solution)
-- [Groundwork](#groundwork)
-  - [Prerequisites](#prerequisites)
-  - [Provisioning EKS Clusters](#provisioning-eks-clusters)
-  - [Installing Basic Addon Charts](#installing-basic-addon-charts)
-  - [Installing a Sample Application Helm Chart](#installing-a-sample-application-helm-chart)
-- [Walkthrough](#walkthrough)
-  - [STEP 1. Install Locust](#step-1-install-locust)
-    - [Switch kubernetes context to run commands on the locust cluster](#switch-kubernetes-context-to-run-commands-on-the-locust-cluster)
-    - [Add Delivery Hero public chart repo](#add-delivery-hero-public-chart-repo)
-    - [Write a locustfile.py](#write-a-locustfile.py)
-    - [Install and Configure Locust with locustfile.py](#install-and-configure-locust-with-locustfile.py)
-  - [STEP 2. Expose Locust via ALB](#step-2-expose-locust-via-alb)
-  - [STEP 3. Checkout Locust Dashboard](#step-3-checkout-locust-dashboard)
-  - [STEP 4. Run Test](#step-4-run-test)
-  - [STEP 5. Run Test (2nd)](#step-5-run-test-2nd)
-- [Clean up](#clean-up)
-- [Summary](#summary)
-- [Security](#security)
-- [License](#license)
+- [Load testing your workload running on Amazon EKS with Locust](#load-testing-your-workload-running-on-amazon-eks-with-locust)
+  - [Table of content](#table-of-content)
+  - [Introduction](#introduction)
+  - [Overview of solution](#overview-of-solution)
+  - [Groundwork](#groundwork)
+    - [Prerequisites](#prerequisites)
+    - [Provisioning EKS Clusters](#provisioning-eks-clusters)
+    - [Installing Basic Addon Charts](#installing-basic-addon-charts)
+    - [Installing a Sample Application Helm Chart](#installing-a-sample-application-helm-chart)
+  - [Walkthrough](#walkthrough)
+    - [STEP 1. Install Locust](#step-1-install-locust)
+      - [_Switch kubernetes context to run commands on the locust cluster:_](#switch-kubernetes-context-to-run-commands-on-the-locust-cluster)
+      - [_Add Delivery Hero public chart repo:_](#add-delivery-hero-public-chart-repo)
+      - [_Write a `locustfile.py` file:_](#write-a-locustfilepy-file)
+      - [Install and Configure Locust with locustfile.py](#install-and-configure-locust-with-locustfilepy)
+    - [STEP 2. Expose Locust via ALB](#step-2-expose-locust-via-alb)
+    - [STEP 3. Checkout Locust Dashboard](#step-3-checkout-locust-dashboard)
+      - [_Open the URL from a browser:_](#open-the-url-from-a-browser)
+    - [STEP 4. Run Test](#step-4-run-test)
+    - [STEP 5. Run Test (2nd)](#step-5-run-test-2nd)
+  - [Clean up](#clean-up)
+  - [Summary](#summary)
+  - [Security](#security)
+  - [License](#license)
 
 ## Introduction
 
-More and more customers are using Elastic Kubernetes Service (EKS) to run their workload on AWS. This is why it is essential to have a process to test your EKS cluster so that you can identify weaknesses upfront and optimize your cluster before you open it to public. Load test focuses on the performance and reliability of the cluster and it is especially important for those expect high elasticity from EKS. [Locust](https://locust.io/) is an open source load testing tools that comes with a real-time dashboard and programmable test scenarios.
+More and more customers are using Elastic Kubernetes Service (EKS) to run their workload on AWS. This is why it is essential to have a process to test your EKS cluster so that you can identify weaknesses upfront and optimize your cluster before you open it to public. Load test focuses on the performance and reliability of a workload running on EKS cluster and it is especially important for those expect high elasticity from EKS. [Locust](https://locust.io/) is an open source load testing tools that comes with a real-time dashboard and programmable test scenarios.
 
 In this post, I walk you through the steps to build two Amazon EKS clusters, one for generating loads using [Locust](https://locust.io/) and another for running a sample workload. The concepts in this post are applicable to any situation where you want to test the performance and reliability of your Amazon [EKS cluster](https://aws.amazon.com/eks).
 
@@ -65,8 +68,8 @@ Install CLI tools and settings.
 - [awscli v2](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-version.html)
 - [Setting AWS Profile](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html) ([with minimum IAM policies](https://eksctl.io/usage/minimum-iam-policies/)):
   `aws sts get-caller-identity`
-- Pull this repository:
-  `git clone https://github.com/aws-samples/load-testing-eks-cluster-with-locust`
+- Prepare git repository:
+  `https://github.com/aws-samples/Load-testing-your-workload-running-on-Amazon-EKS-with-Locust.git`
 
 ### Provisioning EKS Clusters
 
@@ -75,7 +78,7 @@ If you already have clusters, you can skip this steps.
 - [Create Locust Cluster](./groundwork/eks-clusters#create-locust-cluster)
 - [Create Workload Cluster](./groundwork/eks-clusters#create-workload-cluster) (option)
 
-One thing to note is that the default VPC limit is 5 per region, so if you do not have enough resources in your environment, the above cluster creation will fail.
+Please check your AWS Account limits to ensure you can provision 2 VPCs, so if you do not have enough resources in your environment, the above cluster creation will fail.
 
 Then you can check the results in AWS Consoles.
 
@@ -253,7 +256,9 @@ We can watch Cloudwatch container Insights dashboard to get the glimpse of the b
 
 ![cw-performance-case1-workload](./walkthrough/result-images/cw-performance-case1-workload.png)
 
-Everything looks fine seeing our workload cluster can undertake those loads without any issues. Now we can give it a little more stress. Stop the test for now and put more users in the next step. Let’s put `1,000` users with spawn rate of `10` and compare it with the previous graph.
+The test shows that the target workload running on EKS can handle requests from 100 users within sensible response. You can take a up-close look on the performance metrics of the cluster from CloudWatch Container Insights. For advice on how to monitor the EKS Kubernetes Control Plane performance please see <https://aws.github.io/aws-eks-best-practices/reliability/docs/controlplane/>.
+
+Now we can give it a little more stress. Stop the test for now and put more users. Let’s put 1,000 users with spawn rate of 10 and compare it with the previous graph.
 
 <img width="450" alt="locust-dashboard-case2" src="./walkthrough/result-images/locust-dashboard-case2.png">
 
@@ -261,7 +266,7 @@ Everything looks fine seeing our workload cluster can undertake those loads with
 
 ![locust-dashboard-case2-statics](./walkthrough/result-images/locust-dashboard-case2-statics.png)
 
-It looks simmilar to previous teest. It seems that the service can cover these loads.
+It looks similar to previous test. It seems that the service can cover these loads.
 
 ### STEP 5. Run Test (2nd)
 
@@ -277,11 +282,12 @@ When our cluster need to scale during the high peak of loads, we may see slower 
 
 - Find the optimal pod’s readiness probes to minimize the time to wait for newly scaled pods.
 - Fine tune HPA/CA configuration for the specific workloads in order to the autoscaler as responsive as it can when it need to scale out.
-- HPA reaction time + CA reaction time + node provisioning time can take up to 5 minutes, and node provisioning usually takes most of that time, and it is useful to have lighter AMI and have bigger instance type to get utilize of better bin packing efficiency.
+- HPA reaction time + CA reaction time + node provisioning time can take up to 5 minutes or more, and node provisioning usually takes most of that time, and it is useful to have an ligher AMI based on [EKS Optimised AMI](https://docs.aws.amazon.com/eks/latest/userguide/eks-optimized-ami.html) and have bigger instance type to get utilize of better bin packing efficiency.
 - Check with the scaling pod’s entire lifecycle to see if there’re any bottleneck - metric scraping delay + HPA trigger for pods to scale out + container image pulling + application loading time + readiness probe delay
 - Overprovisioning employs temporary pods with negative priority and take ample space in the cluster. When the event of scaling action, it can dramatically reduce the node provisioning time and it trades cost for scheduling latency.
-- Prevent Scale Down Eviction to the CA if you node scales down during the load testing.
+- Prevent Scale Down Eviction to the CA if you node scales down during the load testing. For more information about preventing scale down eviction, see [Cluster-Autoscaler - EKS Best Practices Guides](https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/#prevent-scale-down-eviction).
 - It’s all about a tradeoff between resource optimization and a cost. You need extra headroom of resources within a budget.
+- For more information about Autosacling on EKS, please read the [EKS Best Practice Guide](https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/#optimizing-for-performance-and-scalability).
 
 ## Clean up
 
@@ -312,7 +318,7 @@ kubectl config current-context
 ```bash
 # Clean up target EKS cluster: Workload / Locust
 
-# Uninstall Helm Charts
+# Uninstall All Helm Charts
 helm list -A |grep -v NAME |awk -F" " '{print "helm -n "$2" uninstall "$1}' |xargs -I {} sh -c '{}'
 
 # Check Empty Helm List
@@ -326,6 +332,9 @@ eksctl delete iamserviceaccount --cluster "${TARGET_CLUSTER_NAME}" \
 
 # Delete target EKS cluster: Workload / Locust
 eksctl delete cluster --name="${TARGET_CLUSTER_NAME}"
+
+# Delete ECR Repository: Workload only
+aws ecr delete-repository --repository-name "${ECR_REPO_NAME:-sample-application}"
 ```
 
 It’s done. One things to note, don’t forget to remove **both clusters: `Locust` and `Workload`**.
