@@ -9,7 +9,7 @@ metadata:
   - ingress.k8s.aws/resources
   labels:
     app: ingress
-  name: ingress-locust-dashboad
+  name: ingress-locust-dashboard
   namespace: default
 spec:
   defaultBackend:
