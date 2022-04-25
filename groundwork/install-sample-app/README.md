@@ -217,4 +217,4 @@ helm delete ${CHART_NAME:-workload-chart}
 aws ecr delete-repository --repository-name "${ECR_REPO_NAME:-sample-application}"
 ```
 
-> The total cripts for all-clean-up can be found at ['Clean up' step.](../../#clean-up), end of contents.
+> The total cripts for all-clean-up can be found at ['Cleaning up' step.](../../#cleaning-up), end of contents.
