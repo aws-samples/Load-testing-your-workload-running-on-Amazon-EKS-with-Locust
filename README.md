@@ -14,8 +14,8 @@ For full details about using Locust, please see the [Locust official documentati
   - [Overview of solution](#overview-of-solution)
   - [Groundwork](#groundwork)
     - [Prerequisites](#prerequisites)
-    - [Provisioning EKS Clusters](#provisioning-eks-clusters)
-    - [Installing Basic Addon Charts](#installing-basic-addon-charts)
+    - [Provisioning EKS clusters](#provisioning-eks-clusters)
+    - [Installing basic addon charts](#installing-basic-addon-charts)
     - [Installing a Sample Application Helm Chart](#installing-a-sample-application-helm-chart)
   - [Walkthrough](#walkthrough)
     - [STEP 1. Install Locust](#step-1-install-locust)
@@ -35,7 +35,7 @@ For full details about using Locust, please see the [Locust official documentati
 
 ## Introduction
 
-More and more customers are using Elastic Kubernetes Service (EKS) to run their workload on AWS. This is why it is essential to have a process to test your EKS cluster so that you can identify weaknesses upfront and optimize your cluster before you open it to public. Load test focuses on the performance and reliability of a workload running on EKS cluster and it is especially important for those expect high elasticity from EKS. [Locust](https://locust.io/) is an open source load testing tools that comes with a real-time dashboard and programmable test scenarios.
+More and more customers are using Amazon Elastic Kubernetes Service (Amazon EKS) to run their workload on AWS. This is why it is essential to have a process to test your EKS cluster so that you can identify weaknesses upfront and optimize your cluster before you open it to public. Load test focuses on the performance and reliability of a workload by generating artificial loads that mimics real-world traffic. It is especially useful for those that expect high elasticity from EKS. [Locust](https://locust.io/) is an open source load testing tools that comes with a real-time dashboard and programmable test scenarios.
 
 In this post, I walk you through the steps to build two Amazon EKS clusters, one for generating loads using [Locust](https://locust.io/) and another for running a sample workload. The concepts in this post are applicable to any situation where you want to test the performance and reliability of your Amazon [EKS cluster](https://aws.amazon.com/eks).
 
@@ -43,7 +43,7 @@ You can find all of the code and resources used throughout this post in [the ass
 
 ## Overview of solution
 
-The following diagram illustrates the architecture we use across this post. Your application is running as a group of pods in an EKS cluster (target cluster) and exposed via a public load balancer. Locust, in the meantime, is running in a separate EKS cluster (locust cluster). [Cluster Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html) and [Horizontal Pod Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/horizontal-pod-autoscaler.html) will be configured on both clusters to respond to the need for scaling out in terms of the number of nodes and pods respectively.
+The following diagram illustrates the architecture we use across this post. Your application is running as a group of pods in an EKS cluster (target cluster) and exposed via a public application load balancer. Locust, in the meantime, is running in a separate EKS cluster (locust cluster). [Cluster Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html) and [Horizontal Pod Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/horizontal-pod-autoscaler.html) will be configured on both clusters to respond to the need for scaling out in terms of the number of nodes and pods respectively.
 
 In addition, [AWS Load Balancer Controller](https://github.com/aws/eks-charts/tree/master/stable/aws-load-balancer-controller) will be installed on both clusters to create Application Load Balancers and connect them with your Kubernetes services via [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/).
 
@@ -55,7 +55,7 @@ In addition, [AWS Load Balancer Controller](https://github.com/aws/eks-charts/tr
 
 ## Groundwork
 
-For our journey, we need two EKS Clusters-locust cluster is for load generator, the other is for target of workload. You can setup using below groundwork guide.
+For our journey, we need two EKS Clusters - a locust cluster for load generator and another for running a workload to be tested. You can setup using below groundwork guide.
 
 ### Prerequisites
 
@@ -71,7 +71,7 @@ Install CLI tools and settings.
 - Prepare git repository:
   `https://github.com/aws-samples/Load-testing-your-workload-running-on-Amazon-EKS-with-Locust.git`
 
-### Provisioning EKS Clusters
+### Provisioning EKS clusters
 
 If you already have clusters, you can skip this steps.
 
@@ -90,15 +90,15 @@ Then you can check the results in AWS Consoles.
 
   ![eks-console-result](./groundwork/eks-clusters/result-images/eks-console.png)
 
-### Installing Basic Addon Charts
+### Installing basic addon charts
 
-For load-tesing on EKS, we basically need to install these kubernetes addons charts. These charts are commonly used in EKS clusters, thus we need to do the below installation jobs in both of clusters: `awsblog-loadtest-locust` and `awsblog-loadtest-workload` (or your other target cluster).
+For load testing on EKS, we need a few Kubernetes addons. These addons can be installed either via Kubernetes manifests files in YAML/JSON format or via Helm charts. We are going to use Helm charts as they are commonly used and easy to manage. Given that both clusters  `awsblog-loadtest-locust` and `awsblog-loadtest-workload` (or your other target cluster). are ready, please refer to [the basic addon charts installation guide](./groundwork/install-addon-chart#install-basic-addon-charts)to install the following charts.
 
-- [Deploy Metrics server (YAML)](./groundwork/install-addon-chart#deploy-metrics-server-yaml)
-- [Skip installation step for HPA(Horizontal Pod Autoscaler)](./groundwork/install-addon-chart#skip-installation-step-for-hpa)
-- [Install Cluster Autoscaler (Chart)](./groundwork/install-addon-chart#install-ca-helm-chart)
-- [Install AWS Load Balancer Controller (Chart)](./groundwork/install-addon-chart#install-aws-load-balancer-controller-helm-chart)
-- [Install Container Insights (YAML)](./groundwork/install-addon-chart#install-container-insights)
+- Deploy Metrics server (YAML)
+- Skip installation step for HPA(Horizontal Pod Autoscaler)
+- Install Cluster Autoscaler (Chart)
+- Install AWS Load Balancer Controller (Chart)
+- Install Container Insights (YAML)
 
 ### Installing a Sample Application Helm Chart
 
@@ -107,7 +107,7 @@ As a last step of the groundwork, we need to deploy a sample application to be t
 - [Prepare](./groundwork/install-sample-app#prepare)
 - [Install Workload Application (Helm Chart)](./groundwork/install-sample-app#install-workload-application-helm-chart)
 
-Then you can check the result like this.
+Once you have the sample application installed successfully, you will be able to see a welcome message from the sample application by visiting the DNS name of the Application Load Balancer that is associated with the ingress created by the chart.
 
 ![ingress-home.png](./groundwork/install-sample-app/ingress-home.png)
 

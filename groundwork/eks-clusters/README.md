@@ -1,7 +1,7 @@
-# Prepare EKS Clusters
+# Prepare EKS clusters
 
 - [Prerequisite](#prerequisite)
-- Provisioning EKS Clusters
+- Provisioning EKS clusters
   - [Create Locust Cluster](#create-locust-cluster)
   - [Create Workload Cluster](#create-workload-cluster) (option)
   - [Result](#result)
@@ -25,7 +25,7 @@
   git clone https://github.com/aws-samples/load-testing-eks-cluster-with-locust
   ```
 
-## Create Locust Cluster
+## Create Locust cluster
 
 ### 1. Settings
 
@@ -60,7 +60,7 @@ EOF
 > _maybe you need to check the version of `kubectl` and `eksctl`._  
 > _We recommand to update the latest for matching those versions._
 
-### 2. Create EKS Cluster Configuration file
+### 2. Create EKS cluster Configuration file
 
 ```bash
 # Move to 'eks-clusters' directory from root of repository
@@ -70,16 +70,16 @@ cd groundwork/eks-clusters
 cat eks-cluster-template.yaml | envsubst > "${TARGET_CLUSTER_NAME}.yaml"
 ```
 
-### 3. Provision Locust Cluster with eksctl
+### 3. Provision Locust cluster with eksctl
 
 ```bash
-# Create EKS Cluster
+# Create EKS cluster
 eksctl create cluster --with-oidc -f "${TARGET_CLUSTER_NAME}.yaml"
 ```
 
 > _**Notice.**_  
 > _This step takes about 20 minutes._  
-> _Because it include that create all things (from VPC to EKS Cluster)._
+> _Because it include that create all things (from VPC to EKS cluster)._
 
 ### 4. Check the provision with connection
 
@@ -111,7 +111,7 @@ kubectl get nodes -L position --sort-by=.metadata.labels.position
 # ip-xxx-xxx-xxx-xxx.TARGET_REGION.compute.internal    Ready    <none>   44s     MATCH_ON_EKS_VERSION   locust
 ```
 
-### 5. Set IdP federation for OIDC Provider associated with cluster
+### 5. Set IdP federation for OIDC provider associated with cluster
 
 ```bash
 eksctl utils associate-iam-oidc-provider --cluster=${TARGET_CLUSTER_NAME} --approve
@@ -119,7 +119,7 @@ eksctl utils associate-iam-oidc-provider --cluster=${TARGET_CLUSTER_NAME} --appr
 
 - Refer. [How to find the federated OIDC Provider?](https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/enable-iam-roles-for-service-accounts.html)
 
-#### (option) Add identity to auth ConfigMap on other IAM User
+#### (option) Add identity to auth ConfigMap on other IAM user
 
 ```bash
 # Set target ARN
@@ -158,7 +158,7 @@ kubectl -n kube-system get cm/aws-auth -o json | jq ".data.mapUsers" | jq -r
 
 ---
 
-## Create Workload Cluster
+## Create workload cluster
 
 This is optional step when you need workload cluster for load testing.
 
@@ -174,12 +174,12 @@ Then follow up [(pervious contents from step.2)](#2-create-eks-cluster-configura
 
 ---
 
-## Result
+## Results
 
 - [AWS Console :: CloudFormation Stacks](https://console.aws.amazon.com/cloudformation/home#/stacks?filteringStatus=active&filteringText=awsblog-loadtest&viewNested=true&hideStacks=false)
 
   ![cfn-console-result](./result-images/cfn-console.png)
 
-- [AWS Console :: EKS Clusters](https://console.aws.amazon.com/eks/home)
+- [AWS Console :: EKS clusters](https://console.aws.amazon.com/eks/home)
 
   ![eks-console-result](./result-images/eks-console.png)

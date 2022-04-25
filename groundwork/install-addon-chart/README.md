@@ -1,4 +1,4 @@
-# Install Basic Addon Charts
+# Install basic addon charts
 
 For load-tesing on eks, we basically need to install these kubernetes addons charts.
 These charts are commonly used in eks clusters, thus we need to do the below installation jobs in both of clusters:
@@ -51,7 +51,7 @@ eksctl get clusters --region "${TARGET_REGION}" | egrep "NAME|${TARGET_CLUSTER_N
 # Unset context - Optional
 kubectl config unset current-context
 
-# Set Cluster Context: 1. Locust / 2. Workload
+# Set cluster Context: 1. Locust / 2. Workload
 export TARGET_CLUSTER_NAME=$(kubectl config get-contexts | sed 's/\*/ /g' | grep "@${TARGET_CLUSTER_NAME}." | awk -F" " '{print $1}')
 kubectl config use-context ${TARGET_CLUSTER_NAME}
 
@@ -136,9 +136,9 @@ export CA_POLICY_NAME="ClusterAutoscaler-autoDiscovery"
 export CA="cluster-autoscaler"
 ```
 
-### 1. IRSA for Cluster Autoscaler
+### 1. IRSA for cluster Autoscaler
 
-#### 1-A. Create IAM Policy
+#### 1-A. Create IAM policy
 
 ```bash
 # Prepare policy json file
@@ -175,7 +175,7 @@ cat <<EOF > ${CA_POLICY_JSON} && jq "." ${CA_POLICY_JSON}
 }
 EOF
 
-# Create IAM Policy with the json file
+# Create IAM policy with the json file
 aws iam create-policy \
     --policy-document "file://${CA_POLICY_JSON}" \
     --policy-name "${CA_POLICY_NAME}" \
@@ -190,7 +190,7 @@ aws iam create-policy \
 #### 1-B. Create Service Account with IRSA
 
 ```bash
-# Set IRSA from IAM Policy
+# Set IRSA from IAM policy
 eksctl create iamserviceaccount \
     --cluster "${TARGET_CLUSTER_NAME}" \
     --namespace kube-system \
@@ -306,13 +306,13 @@ helm upgrade --install "addon-${CA}" autoscaler/cluster-autoscaler \
 <details>
 <summary>📝 More read</summary>
 
-- [EKS Web App Workshop - Apply Cluster Autoscaler](https://aws-eks-web-application.workshop.aws/en/100-scaling/200-cluster-scaling.html)
+- [EKS Web App Workshop - Apply cluster Autoscaler](https://aws-eks-web-application.workshop.aws/en/100-scaling/200-cluster-scaling.html)
 - Kubernetes GitHub
   - [Cluster Autoscaler on AWS](https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#cluster-autoscaler-on-aws)
   - [cluster-autoscaler chart](https://github.com/kubernetes/autoscaler/tree/master/charts/cluster-autoscaler#cluster-autoscaler)
     - [values](https://github.com/kubernetes/autoscaler/tree/master/charts/cluster-autoscaler#values)
     - [Scope all Auto Scaling Group in cluster](https://github.com/kubernetes/autoscaler/tree/master/charts/cluster-autoscaler#aws---using-auto-discovery-of-tagged-instance-groups)
-- [EKS User Guide - Cluster Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html)
+- [EKS User Guide - cluster Autoscaler](https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html)
 
 </details>
 
@@ -332,14 +332,14 @@ export AWS_LB_CNTL="aws-load-balancer-controller"
 
 ### 1. IRSA for AWS Load Balancer Controller
 
-- Create IAM Policy
+- Create IAM policy
 
   ```bash
   # Download the iam policy json file
   curl "https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/${AWS_LB_CNTL_VERSION}/docs/install/iam_policy.json" \
       -o "${AWS_LB_CNTL_POLICY_JSON}"
 
-  # Create IAM Policy with the json file
+  # Create IAM policy with the json file
   aws iam create-policy \
       --policy-document "file://${AWS_LB_CNTL_POLICY_JSON}" \
       --policy-name "${AWS_LB_CNTL_POLICY_NAME}" \
@@ -353,7 +353,7 @@ export AWS_LB_CNTL="aws-load-balancer-controller"
   > If you provision the cluters(locust and workloads) in same account, maybe you already created this policy.
   > If you do, you can skip this 1-A step and go to next step to set IRSA.
 
-- Set IRSA from IAM Policy
+- Set IRSA from IAM policy
 
   ```bash
   eksctl create iamserviceaccount \
@@ -417,7 +417,7 @@ kubectl apply -k "github.com/aws/eks-charts/stable/aws-load-balancer-controller/
   # customresourcedefinition.apiextensions.k8s.io/ingressclassparams.elbv2.k8s.aws configured
   # customresourcedefinition.apiextensions.k8s.io/targetgroupbindings.elbv2.k8s.aws configured
 
-# Get VPC ID of Target Cluster
+# Get VPC ID of Target cluster
 export VPC_ID=$(aws eks describe-cluster \
                 --name ${TARGET_CLUSTER_NAME} \
                 --query "cluster.resourcesVpcConfig.vpcId" \
@@ -537,7 +537,7 @@ curl https://raw.githubusercontent.com/aws-samples/amazon-cloudwatch-container-i
 
 📌 **It's done!**
 
-Locust Cluster settings has been done.
+Locust cluster settings has been done.
 
 ```bash
 # To avoid conflictions, free the environment variables
@@ -545,8 +545,8 @@ unset TARGET_GROUP_NAME
 unset TARGET_CLUSTER_NAME
 ```
 
-**The Workload Cluster also needs these same setting.**
-So, you need to walk through with below commands at [top of steps](#environment-settings) for **Workload Cluster.**
+**The Workload cluster also needs these same setting.**
+So, you need to walk through with below commands at [top of steps](#environment-settings) for **Workload cluster.**
 
 ```bash
 # Environments

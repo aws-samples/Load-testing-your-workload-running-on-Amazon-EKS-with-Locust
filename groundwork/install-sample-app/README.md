@@ -12,10 +12,10 @@ As the last ground work, we need to deploy app chart for workload for target of 
       - [(Option) Test this container image](#option-test-this-container-image)
     - [Tag this image](#tag-this-image)
     - [Push the image tag](#push-the-image-tag)
-  - [Install Workload Application (Helm Chart)](#install-workload-application-helm-chart)
+  - [Install Workload application (Helm chart)](#install-workload-application-helm-chart)
     - [Set context of kubectl](#set-context-of-kubectl)
     - [Prepare `values.yaml` file](#prepare-valuesyaml-file)
-    - [Install Chart](#install-chart)
+    - [Install workload chart](#install-workload-chart)
     - [Check the API responses](#check-the-api-responses)
   - [Tip. Clean up the workloads](#tip-clean-up-the-workloads)
 
@@ -59,14 +59,14 @@ EOF
 ### Create an ECR repository
 
 ```bash
-# Create Repository using AWS CLI
+# Create repository using AWS CLI
 aws ecr create-repository --repository-name ${ECR_REPO_NAME} --output json | jq
 
 # Check
 aws ecr describe-repositories --repository-name ${ECR_REPO_NAME} --output json | jq
 ```
 
-> #### Why we use the ECR Repository?
+> #### Why we use the ECR repository?
 >
 > In our load-testing journey, if the load increases, the EKS's MNG(Managed Nodegroup) will provision new worker nodes to allocate new pods.
 > At that point, if you use directly the public DockerHub's image, then **you will be block to pull it from the DockerHub** on your NAT Gateway's EIP address the EKS cluster has used.
@@ -126,7 +126,7 @@ docker push ${ECR_URL}/${ECR_REPO_NAME}:latest
 aws ecr list-images --repository-name ${ECR_REPO_NAME} --output json | jq -c '.imageIds |map(select(.imageTag == "latest"))'
 ```
 
-## Install Workload Application (Helm Chart)
+## Install Workload application (Helm chart)
 
 ### Set context of kubectl
 
@@ -159,7 +159,7 @@ cat workload-chart/values.template | envsubst > workload-chart/values.yaml
 yq e '.image' -I2 workload-chart/values.yaml
 ```
 
-### Install Chart
+### Install workload chart
 
 ```bash
 # In 'install-sample-app' directory
@@ -190,7 +190,7 @@ kubectl get ingress ${CHART_NAME} -o jsonpath='{.status.loadBalancer.ingress[0].
 
 ### Check the API responses
 
-You can check response message in your browser like below.
+Once you have the sample application installed successfully, you will be able to see a welcome message from the sample application by visiting the DNS name of the Application Load Balancer that is associated with the ingress created by the chart. You can check response message in your browser like below.
 
 - `/`
   ![ingress-home.png](./ingress-home.png)
@@ -213,8 +213,8 @@ Nice! It's done :)
 # Uninstall this chart existed in default namespace
 helm delete ${CHART_NAME:-workload-chart}
 
-# Delete ECR Repository
+# Delete ECR repository
 aws ecr delete-repository --repository-name "${ECR_REPO_NAME:-sample-application}"
 ```
 
-> The total cripts for all-clean-up can be found at ['Clean up' step.](../#clean-up), end of contents.
+> The total cripts for all-clean-up can be found at ['Clean up' step.](../../#clean-up), end of contents.
